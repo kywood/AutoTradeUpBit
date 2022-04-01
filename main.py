@@ -3,6 +3,9 @@ import datetime
 
 import pyupbit
 
+
+import traceback
+
 from LimitedList import LimitedList
 from Log import Log, eLogType
 
@@ -10,35 +13,47 @@ from Log import Log, eLogType
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-    li = LimitedList(3)
-
-    li.Append("A")
-    li.Append("B")
-    li.Append("C")
-
-    for dt in li.GetLists():
-        print(dt)
-
-    li.Append("1")
-    li.Append("2")
-    li.Append("3")
-    li.Append("4")
-
-    for dt in li.GetLists():
-        print(dt)
-
-    top = li.GetTop()
-    bottom = li.GetBottom()
-
-    print(top)
-    print(bottom)
-
     #
-    # log = Log()
+    # li = LimitedList(3)
     #
-    # log.Print(eLogType.INFO , "test")
+    # li.Append("A")
+    # li.Append("B")
+    # li.Append("C")
     #
+    # for dt in li.GetLists():
+    #     print(dt)
+    #
+    # li.Append("1")
+    # li.Append("2")
+    # li.Append("3")
+    # li.Append("4")
+    #
+    # for dt in li.GetLists():
+    #     print(dt)
+    #
+    # top = li.GetTop()
+    # bottom = li.GetBottom()
+    #
+    # print(top)
+    # print(bottom)
+
+
+    log = Log()
+
+    log.Print(eLogType.INFO , "test")
+
+    try:
+
+        a=[]
+        a[10]=10
+
+    except Exception as e:
+
+        log.Print(eLogType.ERROR,traceback.format_exc())
+
+        pass
+
+
     #
     # now = datetime.datetime.now().strftime("""%Y%m%d%H%M%S""")
     #

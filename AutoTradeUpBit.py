@@ -3,6 +3,8 @@ import datetime
 from enum import Enum
 import pyupbit
 
+import traceback
+
 from FileWriter import FileWriter
 from Log import Log, eLogType
 from MA import MA, eTrendDir
@@ -240,7 +242,7 @@ class AutoTradeUpBit :
                             self.tradeState = eTradeState.NONE
 
             except Exception as e:
-                self.log.Print( eLogType.ERROR , e )
+                self.log.Print( eLogType.ERROR , traceback.format_exc() )
             finally:
                 time.sleep(self.tradeIntervalSec)
             pass
