@@ -5,7 +5,15 @@ import pyupbit
 
 from FileWriter import FileWriter
 from Log import Log, eLogType
+from MA import MA, eTrendDir
+from MaLists import MaLists
+from Utils import Utils
 
+
+class eMAType(Enum):
+    MA15 = "ma15"
+    MA25 = "ma25"
+    MA50 = "ma50"
 
 class eIntervalType(Enum):
     DAY="day"
@@ -18,8 +26,10 @@ class eIntervalType(Enum):
 class eTradeState(Enum):
 
     NONE = 0    # 어플이 시작됨 ..
-    BUYING = 1  # 사서 들고 있음   --> 연속적으로  계속 sell 나와야 판다.....
-    SELLING = 2 # 팔아 놓은 상태.............
+    BUY_TRY = 1  # 살려고 노력중
+    BUYING = 2  # 사서 들고 있음
+    SELL_TRY = 3  # 팔려고 시도중
+    SELLING = 4 # 팔아 놓은 상태.............
 
 class TradePrice :
 
@@ -39,6 +49,7 @@ class AutoTradeUpBit :
 
     def __init__(self,_access , _secret ,
                  _ticker , _tradeIntervalSec ,
+                 _buyContinueCount ,
                  _sellContinueCount ,
                  log=None):
 
@@ -46,12 +57,17 @@ class AutoTradeUpBit :
         self.upbit = pyupbit.Upbit(_access, _secret)
         # 트레이드 간격
         self.tradeIntervalSec = _tradeIntervalSec
+
+
+        self.buyContinueCount = _buyContinueCount
         # 판매시
         self.sellContinueCount = _sellContinueCount
         self.sellIngCount = 0
         self.tradeState = eTradeState.NONE
 
         self.fileWriter = None
+
+        self.QueueSize = 0;
 
         if log==None:
             self.log = Log("AutoTradeUpBit")
@@ -71,11 +87,13 @@ class AutoTradeUpBit :
         self.fileWriter.Open()
         pass
 
+    def SetMaQueueSize(self,queueSize):
+        self.QueueSize=queueSize
+
     def FileWriteln(self,message):
 
         if self.fileWriter == None:
             return
-
         self.fileWriter.Writeln(message)
 
         pass
@@ -111,14 +129,26 @@ class AutoTradeUpBit :
 
         # f = open("./test.txt", 'w')
 
+        self.Malists = MaLists()
+
+
+
+        self.Malists.CreateMa( eMAType.MA15.value ,  MA( self.ticker , eIntervalType.MIN1 , 15 , self.QueueSize ) )
+        self.Malists.CreateMa( eMAType.MA25.value , MA( self.ticker , eIntervalType.MIN1 , 25 , self.QueueSize ) )
+        self.Malists.CreateMa( eMAType.MA50.value , MA( self.ticker , eIntervalType.MIN1 , 50 , self.QueueSize ) )
+
         while True:
             try:
 
                 # now = datetime.datetime.now()
 
-                ma15 = self.get_ma(eIntervalType.MIN1, 15)
-                ma25 = self.get_ma(eIntervalType.MIN1, 25)
-                ma50 = self.get_ma(eIntervalType.MIN1, 50)
+                ma15 = self.Malists.GetMa( eMAType.MA15.value ).GetMA()
+                ma25 = self.Malists.GetMa( eMAType.MA25.value ).GetMA()
+                ma50 = self.Malists.GetMa( eMAType.MA50.value ).GetMA()
+
+                # ma15 = self.get_ma(eIntervalType.MIN1, 15)
+                # ma25 = self.get_ma(eIntervalType.MIN1, 25)
+                # ma50 = self.get_ma(eIntervalType.MIN1, 50)
 
                 currentPrice = self.get_current_price()
 
@@ -126,9 +156,9 @@ class AutoTradeUpBit :
 
                 tPrice = []
                 tPrice.append( TradePrice("cp" , currentPrice) )
-                tPrice.append( TradePrice("ma15" , ma15) )
-                tPrice.append( TradePrice("ma25" , ma25) )
-                tPrice.append( TradePrice("ma50" , ma50) )
+                tPrice.append( TradePrice(eMAType.MA15.value , ma15) )
+                tPrice.append( TradePrice(eMAType.MA25.value , ma25) )
+                tPrice.append( TradePrice(eMAType.MA50.value , ma50) )
 
                 tPrice.sort(key=lambda tradePrice : tradePrice.price , reverse=True )
 
@@ -136,9 +166,15 @@ class AutoTradeUpBit :
 
                 loopCnt = 0
                 for p in tPrice:
-                    loopCnt +=1
+                    if p.name == "cp":
+                        self.log.Print(eLogType.INFO, f"""{loopCnt + 1} {p.name} {p.price}""")
+                    else:
+                        self.log.Print(eLogType.INFO,
+                                       f"""{loopCnt + 1} {p.name} {p.price} {self.Malists.GetMa(p.name).GetTrendDir()}""")
+                    # self.log.Print( eLogType.INFO ,  f"""{loopCnt + 1} {p.name} {p.price} {self.Malists.GetMa( loopCnt ).GetTrendDir()}""" )
+                    # self.log.Print( eLogType.INFO ,  f"""{loopCnt + 1} {p.name} {p.price}""" )
 
-                    self.log.Print( eLogType.INFO ,  f"""{loopCnt} {p.name} {p.price}""" )
+                    loopCnt += 1
                     # print( str(loopCnt) , " " , p.name , " " , str(p.price))
                 # print(" ")
                 self.log.Print( eLogType.INFO ,  " " )
@@ -150,14 +186,35 @@ class AutoTradeUpBit :
                     self.sellIngCount = 0
 
                     if self.tradeState == eTradeState.NONE:
-                        # print("Buy " , now , " Buy Price : " , str(currentPrice) )
-                        self.buyTradePrice = TradePrice("Buy" , currentPrice)
-                        # print("Buy " + self.buyTradePrice.ToString())
-                        self.log.Print(eLogType.INFO, f"-Buy- {self.buyTradePrice.ToString()}")
 
-                        self.FileWriteln( f"-Buy- {self.buyTradePrice.ToString()}" )
+                        self.buyTryCount = 0
+                        self.tradeState = eTradeState.BUY_TRY
 
-                        self.tradeState = eTradeState.BUYING
+                    elif self.tradeState == eTradeState.BUY_TRY:
+
+                        isTrendDirUP = self.Malists.IsTrendDir(eTrendDir.UP)
+
+                        self.log.Print(eLogType.INFO,
+                                       f"-Buy try- {self.buyTryCount} ISTrendDirUP : {isTrendDirUP} TIME:{ Utils.CurrentTimeString() }")
+                        self.FileWriteln(f"-Buy try- {self.buyTryCount} ISTrendDirUP : {isTrendDirUP} TIME:{ Utils.CurrentTimeString() }")
+
+                        if isTrendDirUP == False:
+
+                            self.tradeState = eTradeState.NONE
+                        else:
+                            # self.log.Print(eLogType.INFO, f"-Buy try- {self.buyTryCount}")
+                            # self.FileWriteln(f"-Buy try- {self.buyTryCount}")
+                            # 여기서 업이 아니면 다시 돌아간다...
+
+                            self.buyTryCount += 1
+                            if self.buyTryCount > self.buyContinueCount:
+
+                                self.buyTradePrice = TradePrice("Buy", currentPrice)
+                                self.log.Print(eLogType.INFO, f"-Buy- {self.buyTradePrice.ToString()}")
+                                self.FileWriteln(f"-Buy- {self.buyTradePrice.ToString()}")
+                                self.tradeState = eTradeState.BUYING
+
+
                 else:
                     # print("sel")
                     if self.tradeState == eTradeState.BUYING:
@@ -203,8 +260,9 @@ def main():
 
     log = Log("AutoTradeUpBit")
 
-    autoTrade = AutoTradeUpBit("access" , "se" , "KRW-BTC" , 1 , 30,log)
+    autoTrade = AutoTradeUpBit("access" , "se" , "KRW-BTC" , 1 , 30,30,log)
     autoTrade.SetFileWriter("./tradeLog.txt")
+    autoTrade.SetMaQueueSize(10)
 
     autoTrade.Run()
 
