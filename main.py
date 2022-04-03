@@ -1,11 +1,12 @@
 import time
 import datetime
-
+import platform
 import pyupbit
 
 
 import traceback
 
+from AutoTradeUpBit import eMAType, TradePrice
 from LimitedList import LimitedList
 from Log import Log, eLogType
 
@@ -37,21 +38,44 @@ def print_hi(name):
     # print(top)
     # print(bottom)
 
+    tPrice = dict()
 
-    log = Log()
+    tPrice[eMAType.CP.value] = TradePrice(eMAType.CP.value, 10)
+    tPrice[eMAType.MA15.value] = TradePrice(eMAType.MA15.value, 20)
+    tPrice[eMAType.MA25.value] = TradePrice(eMAType.MA25.value, 3)
+    tPrice[eMAType.MA50.value] = TradePrice(eMAType.MA50.value, 70)
 
-    log.Print(eLogType.INFO , "test")
 
-    try:
+    tPrice = dict(sorted(tPrice.items(), key=lambda tradePrice: tradePrice[1].price, reverse=True))
 
-        a=[]
-        a[10]=10
 
-    except Exception as e:
 
-        log.Print(eLogType.ERROR,traceback.format_exc())
+    # //print( tPrice.k )
+
+    for k,v in tPrice.items():
+
+        print(tPrice[k].ToString())
 
         pass
+
+    platform.system()
+
+    #
+    #
+    # log = Log()
+    #
+    # log.Print(eLogType.INFO , "test")
+    #
+    # try:
+    #
+    #     a=[]
+    #     a[10]=10
+    #
+    # except Exception as e:
+    #
+    #     log.Print(eLogType.ERROR,traceback.format_exc())
+    #
+    #     pass
 
 
     #
