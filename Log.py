@@ -14,24 +14,27 @@ class eLogType(Enum):
 
 class Log:
 
-    def __init__(self,_name="",_configFile='logging.conf'):
+    def __init__(self,_name="",_configFile='logging.conf',_version=""):
         logging.config.fileConfig(_configFile)
         self.logger = logging.getLogger(_name)
+        self.version=_version
         pass
 
     def Print(self,logType,message):
 
+        nmes = f"""[{self.version}] {message}"""
+
         if logType==eLogType.DEBUG :
-            self.logger.debug(message)
+            self.logger.debug(nmes)
         elif logType==eLogType.INFO :
-            self.logger.info(message)
+            self.logger.info(nmes)
         elif logType==eLogType.WARNING :
-            self.logger.warning(message)
+            self.logger.warning(nmes)
         elif logType==eLogType.ERROR :
-            self.logger.error(message)
+            self.logger.error(nmes)
         elif logType == eLogType.CRITICAL:
-            self.logger.critical(message)
+            self.logger.critical(nmes)
         else:
-            self.logger.error(message)
+            self.logger.error(nmes)
 
         pass

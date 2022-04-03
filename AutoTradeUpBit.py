@@ -13,6 +13,9 @@ from MaLists import MaLists
 from Utils import Utils
 
 
+global G_VERSION
+
+
 class eMAType(Enum):
     CP = "cp"
     MA15 = "ma15"
@@ -176,6 +179,8 @@ class AutoTradeUpBit :
 
                 # sorted(tPrice , key=lambda tradePrice : tradePrice.price)
 
+                currentTimeString = Utils.CurrentTimeString(dateFormat)
+
                 loopCnt = 0
                 for key , tradePrice  in tPrice.items():
                     if tradePrice.name == eMAType.CP.value:
@@ -202,13 +207,14 @@ class AutoTradeUpBit :
                         self.buyTryCount = 0
                         self.tradeState = eTradeState.BUY_TRY
 
-                    elif self.tradeState == eTradeState.BUY_TRY:
+
+                    if self.tradeState == eTradeState.BUY_TRY:
 
                         isTrendDirUP = self.Malists.IsTrendDir(eTrendDir.UP)
 
                         self.log.Print(eLogType.INFO,
-                                       f"-Buy try- {self.buyTryCount} ISTrendDirUP : {isTrendDirUP} price : {currentPrice} TIME:{ Utils.CurrentTimeString(dateFormat) }")
-                        self.FileWriteln(f"-Buy try- {self.buyTryCount} ISTrendDirUP : {isTrendDirUP} price : {currentPrice} TIME:{ Utils.CurrentTimeString(dateFormat) }")
+                                       f"-Buy try- {self.buyTryCount} ISTrendDirUP : {isTrendDirUP} price : {currentPrice} TIME:{ currentTimeString }")
+                        self.FileWriteln(f"-Buy try- {self.buyTryCount} ISTrendDirUP : {isTrendDirUP} price : {currentPrice} TIME:{ currentTimeString }")
 
                         if isTrendDirUP == False:
 
@@ -264,6 +270,7 @@ class AutoTradeUpBit :
 
 
 def main():
+    G_VERSION = "V.20220403-1"
 
     buyTryCnt = 20
     sellTryCnt = 20
@@ -276,12 +283,13 @@ def main():
         fileLoggingConf = basePath + "/" + fileLoggingConf
         fileTradeLog = basePath + "/" + fileTradeLog
 
-    log = Log("AutoTradeUpBit",fileLoggingConf)
+    log = Log("AutoTradeUpBit",_configFile=fileLoggingConf, _version=G_VERSION)
 
     autoTrade = AutoTradeUpBit("access" , "se" , ticker , 1 , buyTryCnt,sellTryCnt,log)
     autoTrade.SetFileWriter(fileTradeLog)
     autoTrade.SetMaQueueSize(10)
 
+    # log.Print(eLogType.INFO,AppStart{})
     autoTrade.Run()
 
     pass
