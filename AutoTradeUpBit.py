@@ -22,9 +22,10 @@ global G_VERSION
 
 class MAEle:
 
-    def __init__(self,_ematype , _min):
+    def __init__(self,_ematype , _min , _active=True):
         self.maType = _ematype
         self.min = _min
+        self.isActive = _active
         pass
 
     pass
@@ -168,7 +169,7 @@ class AutoTradeUpBit :
         dateFormat = """%Y%m%d-%H:%M:%S"""
 
         self.Malists.CreateMa( eMAType.MA8.value ,  MA( self.ticker , eIntervalType.MIN1 , 8 , self.QueueSize ) )
-        self.Malists.CreateMa( eMAType.MA15.value ,  MA( self.ticker , eIntervalType.MIN1 , 15 , self.QueueSize ) )
+        self.Malists.CreateMa( eMAType.MA15.value , MA( self.ticker , eIntervalType.MIN1 , 15 , self.QueueSize ) )
         self.Malists.CreateMa( eMAType.MA25.value , MA( self.ticker , eIntervalType.MIN1 , 25 , self.QueueSize ) )
         self.Malists.CreateMa( eMAType.MA50.value , MA( self.ticker , eIntervalType.MIN1 , 50 , self.QueueSize ) )
 
