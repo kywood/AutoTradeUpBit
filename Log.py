@@ -9,7 +9,6 @@ class eLogType(Enum):
     WARNING=2
     ERROR=3
     CRITICAL=4
-
     pass
 
 class Log:
@@ -22,7 +21,10 @@ class Log:
 
     def Print(self,logType,message):
 
-        nmes = f"""[{self.version}] {message}"""
+        if self.version=="":
+            nmes = f"""{message}"""
+        else:
+            nmes = f"""[{self.version}] {message}"""
 
         if logType==eLogType.DEBUG :
             self.logger.debug(nmes)
