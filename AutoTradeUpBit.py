@@ -8,7 +8,7 @@ import traceback
 
 from typing import Dict
 
-from FileWriter import FileWriter
+from Utils.FileWriter import FileWriter
 from Log import Log, eLogType
 from MA import MA, eTrendDir
 from MaLists import MaLists
