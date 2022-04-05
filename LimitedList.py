@@ -27,16 +27,15 @@ class LimitedList:
         return  self.lists
 
     def IsFill(self):
-
         if len(self.lists) >= self.limitSize:
             return True
         return False
 
 
-    def GetTop(self):
+    def GetFirst(self):
         return self.lists[0]
 
-    def GetBottom(self):
+    def GetLast(self):
         return self.lists[len(self.lists) - 1]
 
     pass

@@ -10,6 +10,12 @@ class MaLists:
         self.Malists[_name] =_ma
         pass
 
+    def IsTrendBreak(self,currentPrice):
+        for k , v in self.Malists.items():
+            if currentPrice <= v.GetLastMA():
+                return False
+
+        return True
 
     def IsTrendDir(self,trendDir):
         for ma in self.Malists.values():

@@ -100,10 +100,10 @@ class AutoTradeUpBit :
             self.log = log
 
         self.MaEle = {
-            eMAType.MA8.name :  MAEle( eMAType.MA15 ,8 ) ,
-            eMAType.MA15.name :  MAEle( eMAType.MA15 ,15 ) ,
-            eMAType.MA25.name :  MAEle( eMAType.MA15 ,25 ) ,
-            eMAType.MA50.name :  MAEle( eMAType.MA15 ,50 )
+            eMAType.MA8.name :  MAEle( eMAType.MA8 ,8,True ) ,
+            eMAType.MA15.name :  MAEle( eMAType.MA15 ,15,False) ,
+            eMAType.MA25.name :  MAEle( eMAType.MA25 ,25,False) ,
+            eMAType.MA50.name :  MAEle( eMAType.MA50 ,50,True)
         }
 
         pass
@@ -168,27 +168,48 @@ class AutoTradeUpBit :
 
         dateFormat = """%Y%m%d-%H:%M:%S"""
 
-        self.Malists.CreateMa( eMAType.MA8.value ,  MA( self.ticker , eIntervalType.MIN1 , 8 , self.QueueSize ) )
-        self.Malists.CreateMa( eMAType.MA15.value , MA( self.ticker , eIntervalType.MIN1 , 15 , self.QueueSize ) )
-        self.Malists.CreateMa( eMAType.MA25.value , MA( self.ticker , eIntervalType.MIN1 , 25 , self.QueueSize ) )
-        self.Malists.CreateMa( eMAType.MA50.value , MA( self.ticker , eIntervalType.MIN1 , 50 , self.QueueSize ) )
+        # self.Malists.CreateMa( eMAType.MA8.value ,  MA( self.ticker , eIntervalType.MIN1 , 8 , self.QueueSize ) )
+        # self.Malists.CreateMa( eMAType.MA15.value , MA( self.ticker , eIntervalType.MIN1 , 15 , self.QueueSize ) )
+        # self.Malists.CreateMa( eMAType.MA25.value , MA( self.ticker , eIntervalType.MIN1 , 25 , self.QueueSize ) )
+        # self.Malists.CreateMa( eMAType.MA50.value , MA( self.ticker , eIntervalType.MIN1 , 50 , self.QueueSize ) )
+
+        for maEleKey , maEle in self.MaEle.items():
+            # self.Malists.CreateMa(eMAType.MA8.value, MA(self.ticker, eIntervalType.MIN1, 8, self.QueueSize))
+
+            if maEle.isActive == False:
+                continue
+
+            ma = MA(self.ticker, eIntervalType.MIN1, maEle.min, self.QueueSize)
+            # ma.TradeMA()
+            self.Malists.CreateMa(eMAType(maEle.maType).value, ma)
+            pass
 
         while True:
             try:
-
-                ma8  = self.Malists.GetMa( eMAType.MA8.value ).GetMA()
-                ma15 = self.Malists.GetMa( eMAType.MA15.value ).GetMA()
-                ma25 = self.Malists.GetMa( eMAType.MA25.value ).GetMA()
-                ma50 = self.Malists.GetMa( eMAType.MA50.value ).GetMA()
+                # ma8  = self.Malists.GetMa( eMAType.MA8.value ).TradeMA()
+                # ma15 = self.Malists.GetMa( eMAType.MA15.value ).TradeMA()
+                # ma25 = self.Malists.GetMa( eMAType.MA25.value ).TradeMA()
+                # ma50 = self.Malists.GetMa( eMAType.MA50.value ).TradeMA()
 
                 currentPrice = self.get_current_price()
 
                 tPrice = {}
                 tPrice[eMAType.CP.value]  =  TradePrice( eMAType.CP.value , currentPrice)
-                tPrice[eMAType.MA8.value] = TradePrice(eMAType.MA8.value , ma8)
-                tPrice[eMAType.MA15.value] = TradePrice(eMAType.MA15.value , ma15)
-                tPrice[eMAType.MA25.value] = TradePrice(eMAType.MA25.value , ma25)
-                tPrice[eMAType.MA50.value] = TradePrice(eMAType.MA50.value , ma50)
+
+                # Trade MA
+                for maName , maObj in self.Malists.GetLists().items() :
+                    tPrice[maName] = TradePrice(maName, maObj.TradeMA() )
+                    pass
+                #
+                # tPrice[eMAType.MA8.value] = TradePrice(eMAType.MA8.value , ma8)
+                # tPrice[eMAType.MA15.value] = TradePrice(eMAType.MA15.value , ma15)
+                # tPrice[eMAType.MA25.value] = TradePrice(eMAType.MA25.value , ma25)
+                # tPrice[eMAType.MA50.value] = TradePrice(eMAType.MA50.value , ma50)
+
+                # ma8  = self.Malists.GetMa( eMAType.MA8.value ).GetLastMA()
+                # ma15 = self.Malists.GetMa( eMAType.MA15.value ).GetLastMA()
+                # ma25 = self.Malists.GetMa( eMAType.MA25.value ).GetLastMA()
+                # ma50 = self.Malists.GetMa( eMAType.MA50.value ).GetLastMA()
 
                 tPrice = dict(sorted(  tPrice.items() , key= lambda tradePrice : tradePrice[1].price , reverse=True))
 
@@ -206,10 +227,11 @@ class AutoTradeUpBit :
                     loopCnt += 1
                 self.log.Print( eLogType.INFO ,  " " )
 
-                if currentPrice > ma8 and \
-                    currentPrice > ma15 and \
-                    currentPrice > ma25 and \
-                    currentPrice > ma50 :
+                if self.Malists.IsTrendBreak(currentPrice) == True :
+                # if currentPrice > ma8 and \
+                #     currentPrice > ma15 and \
+                #     currentPrice > ma25 and \
+                #     currentPrice > ma50 :
 
                     self.sellIngCount = 0
 
@@ -268,15 +290,15 @@ class AutoTradeUpBit :
                             self.log.Print(eLogType.INFO,f"""-Sell-
 {SellTradePrice.ToString()}
 Buying {self.buyTradePrice.ToString()}
-Result : {str(self.buyTradePrice - SellTradePrice.price)}
-Avg : {str((self.buyTradePrice - SellTradePrice.price) / self.buyTradePrice * 100)}
+Result : {str(self.buyTradePrice.price - SellTradePrice.price)}
+Avg : {str((self.buyTradePrice.price - SellTradePrice.price) / self.buyTradePrice * 100)}
 """)
 
                             self.FileWriteln(f"""-Sell- 
 {SellTradePrice.ToString()} 
 Buying {self.buyTradePrice.ToString()}
-Result : {str(self.buyTradePrice - SellTradePrice.price)}
-Avg : {str((self.buyTradePrice - SellTradePrice.price) / self.buyTradePrice * 100)}
+Result : {str(self.buyTradePrice.price - SellTradePrice.price)}
+Avg : {str((self.buyTradePrice.price - SellTradePrice.price) / self.buyTradePrice * 100)}
 """)
 
                             # 요때 마다 파일로 남길것 수익율 뭐 그런거....

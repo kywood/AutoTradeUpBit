@@ -20,20 +20,24 @@ class MA:
 
         pass
 
-    def GetMA(self):
+    def TradeMA(self):
         df = pyupbit.get_ohlcv(self.ticker, interval=self.intervalType.value, count=self.minAvg)
         ma = df['close'].rolling(self.minAvg).mean().iloc[-1]
         self.limitLists.Append(ma)
-
         return ma
+
+    def GetLastMA(self):
+        return self.limitLists.GetLast()
+        pass
+
 
     def GetTrendDir(self):
 
         if self.limitLists.IsFill() == False:
             return eTrendDir.NONE
 
-        top = self.limitLists.GetTop()
-        bottom = self.limitLists.GetBottom()
+        top = self.limitLists.GetFirst()
+        bottom = self.limitLists.GetLast()
 
         if top < bottom:
             return eTrendDir.UP
