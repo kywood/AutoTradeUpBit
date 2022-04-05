@@ -1,10 +1,41 @@
 import threading
 import platform
+import time
+from enum import Enum
+
 from AutoTradeUpBit import eTradeState, MAEle, eMAType, eIntervalType, TradePrice, AutoTradeUpBit
 from Log import Log, eLogType
 from MA import MA, eTrendDir
+from Utils.Csv import CustomCsv
+from Utils.CsvData import CsvData
 from Utils.Utils import Utils
 global G_VERSION
+
+
+
+class eCSVHeader(Enum):
+    NONE=-1
+    DATE_TIME=0
+    CURRENT_PRICE=1
+    MA8=2
+    MA15=3
+    MA25=4
+    MA50=5
+    MAX=6
+
+    @staticmethod
+    def GetRowdata():
+        csvData=CsvData()
+        csvData.Append(eCSVHeader.DATE_TIME.name)
+        csvData.Append(eCSVHeader.CURRENT_PRICE.name)
+        csvData.Append(eCSVHeader.MA8.name)
+        csvData.Append(eCSVHeader.MA15.name)
+        csvData.Append(eCSVHeader.MA25.name)
+        csvData.Append(eCSVHeader.MA50.name)
+        return csvData.GetRows()
+
+    pass
+
 
 
 class UpBitDataCollect(AutoTradeUpBit) :
@@ -12,7 +43,7 @@ class UpBitDataCollect(AutoTradeUpBit) :
     def __init__(self, _ticker, _queueSize , _maEleDict , _tradeIntervalSec=1, _buyContinueCount=0,
                  _sellContinueCount=0, _access="", _secret="" ,_log=None):
 
-        super().__init__(_access, _secret, _ticker, _tradeIntervalSec, _buyContinueCount, _sellContinueCount, _log)
+        super().__init__(_access, _secret, _ticker,_queueSize, _tradeIntervalSec, _buyContinueCount, _sellContinueCount, _log)
 
 
         if _log==None:
@@ -20,8 +51,22 @@ class UpBitDataCollect(AutoTradeUpBit) :
         else:
             self.log = _log
 
-        self.QueueSize = _queueSize
+        self.csv=None
+
+
         self.MaEle = _maEleDict
+
+
+    def SetFileWriter(self,fileName):
+        # super().SetFileWriter(fileName)
+        self.csv=CustomCsv(fileName)
+        self.csv.Open()
+
+        pass
+
+    def FileWriteln(self,rowData):
+        self.csv.WriteRowData( rowData )
+        pass
 
 
     def RunAct(self,tPrice,dateFormat):
@@ -36,6 +81,9 @@ class UpBitDataCollect(AutoTradeUpBit) :
             tPrice[maName] = TradePrice(maName, maObj.TradeMA())
             pass
 
+        csvData = CsvData().Append(currentTimeString).Append(currentPrice)
+
+
         loopCnt = 0
         for key, tradePrice in tPrice.items():
             if tradePrice.name == eMAType.CP.value:
@@ -43,8 +91,15 @@ class UpBitDataCollect(AutoTradeUpBit) :
             else:
                 self.log.Print(eLogType.INFO,
                                f"""{loopCnt + 1} {tradePrice.name} {tradePrice.price} {self.Malists.GetMa(tradePrice.name).GetTrendDir()}""")
+
+                csvData.Append(tradePrice.price)
+
             # self.log.Print( eLogType.INFO ,  f"""{loopCnt + 1} {p.name} {p.price}""" )
             loopCnt += 1
+
+        self.log.Print(eLogType.INFO,"--------------------------------------------------------------------------")
+
+        self.FileWriteln(csvData.GetRows())
 
         threading.Timer(self.tradeIntervalSec, self.RunAct, [tPrice, dateFormat]).start()
 
@@ -57,24 +112,19 @@ class UpBitDataCollect(AutoTradeUpBit) :
             if maEle.isActive == False:
                 continue
 
-            ma = MA(self.ticker, eIntervalType.MIN1, maEle.min)
+            ma = MA(self.ticker, eIntervalType.MIN1, maEle.min , self.QueueSize)
             # ma.TradeMA()
             self.Malists.CreateMa(eMAType(maEle.maType).value, ma)
             pass
 
         tPrice = {}
-        dateFormat = """%Y%m%d-%H:%M:%S"""
+        dateFormat = """%Y%m%d%H%M%S"""
         self.RunAct(tPrice,dateFormat)
 
-        #
-        #
         # while True:
         #     time.sleep(10)
         #     pass
-
         pass
-
-
     pass
 
 
@@ -84,7 +134,7 @@ def main():
     CollectCycle = 1
     Ticker = "KRW-BTC"
     LoggingConfFile = "logging.conf"
-    DataWriteFile = "UpBitCollect.txt"
+    DataWriteFile = "UpBitCollect.csv"
     QueueSize=10
 
     MaEle = {
@@ -103,7 +153,9 @@ def main():
     log = Log("AutoTradeUpBit",_configFile=LoggingConfFile, _version=G_VERSION)
 
     dCollect = UpBitDataCollect( Ticker ,QueueSize, MaEle,CollectCycle , _log=log)
+
     dCollect.SetFileWriter(DataWriteFile)
+    dCollect.FileWriteln( eCSVHeader.GetRowdata())
 
     dCollect.Run()
 

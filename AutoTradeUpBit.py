@@ -72,7 +72,7 @@ class TradePrice :
 class AutoTradeUpBit :
 
     def __init__(self,_access , _secret ,
-                 _ticker , _tradeIntervalSec ,
+                 _ticker , _queueSize , _tradeIntervalSec ,
                  _buyContinueCount ,
                  _sellContinueCount ,
                  log=None):
@@ -82,7 +82,7 @@ class AutoTradeUpBit :
         # 트레이드 간격
         self.tradeIntervalSec = _tradeIntervalSec
 
-
+        self.QueueSize = _queueSize
         self.buyContinueCount = _buyContinueCount
         # 판매시
         self.sellContinueCount = _sellContinueCount
@@ -91,7 +91,9 @@ class AutoTradeUpBit :
 
         self.fileWriter = None
 
-        self.QueueSize = 0;
+        # self.QueueSize = 0;
+
+        self.Malists = MaLists()
 
         if log==None:
             self.log = Log("AutoTradeUpBit")
@@ -163,7 +165,7 @@ class AutoTradeUpBit :
 
         # f = open("./test.txt", 'w')
 
-        self.Malists = MaLists()
+
 
         dateFormat = """%Y%m%d-%H:%M:%S"""
 
@@ -326,15 +328,17 @@ def main():
     fileTradeLog = "tradeLog.txt"
     basePath = "/home/ubuntu/project/py/AutoTradeUpbit"
 
+    QueueSize=10
+
     if platform.system() == "Linux":
         fileLoggingConf = basePath + "/" + fileLoggingConf
         fileTradeLog = basePath + "/" + fileTradeLog
 
     log = Log("AutoTradeUpBit",_configFile=fileLoggingConf, _version=G_VERSION)
 
-    autoTrade = AutoTradeUpBit("access" , "se" , ticker , 1 , buyTryCnt,sellTryCnt,log)
+    autoTrade = AutoTradeUpBit("access" , "se" , ticker ,QueueSize, 1 , buyTryCnt,sellTryCnt,log)
     autoTrade.SetFileWriter(fileTradeLog)
-    autoTrade.SetMaQueueSize(10)
+    # autoTrade.SetMaQueueSize(10)
 
     # log.Print(eLogType.INFO,AppStart{})
     autoTrade.Run()

@@ -1,3 +1,4 @@
+import os
 import time
 import datetime
 import platform
@@ -9,6 +10,9 @@ import traceback
 from AutoTradeUpBit import eMAType, TradePrice
 from LimitedList import LimitedList
 from Log import Log, eLogType
+from UpBitDataCollect import eCSVHeader
+from Utils.Csv import CustomCsv
+from Utils.CsvData import CsvData
 
 
 def print_hi(name):
@@ -18,23 +22,50 @@ def print_hi(name):
     log = Log(_version="v1")
     log.Print(eLogType.INFO , "test")
 
-    a=10
-    b=100
-    c=1000
+
+    csv=CustomCsv("./UpBitCollect.txt")
+    csv.Open()
+
+    # csvData = CsvData()
+    # csvData.Append(1).Append("3")
+    # # csvData.Append("3")
+    # csvData.Append("korea")
+    #
+    # csvData2=CsvData([2,"100","usa"])
+    #
+
+    csv.WriteHead(eCSVHeader.GetRowdata())
+
+    # csv.WriteRowData([1,"bb","cc"])
+    # csv.WriteRowData([2,"bb","cc"])
+    # csv.WriteRowData([4,"bb","cc"])
+    # csv.WriteRowData([6,"bb","cc"])
+    # csv.WriteRowData(csvData.GetRows())
+    # csv.WriteRowData(csvData2.GetRows())
 
 
-    lili = LimitedList(3)
+    csv.Close()
 
-    lili.Append(10)
-    lili.Append(20)
-    lili.Append(30)
 
-    print(lili)
 
-    lili.Append(100)
-    lili.Append(200)
-
-    print(lili)
+    #
+    # a=10
+    # b=100
+    # c=1000
+    #
+    #
+    # lili = LimitedList(3)
+    #
+    # lili.Append(10)
+    # lili.Append(20)
+    # lili.Append(30)
+    #
+    # print(lili)
+    #
+    # lili.Append(100)
+    # lili.Append(200)
+    #
+    # print(lili)
 
 #
 #     print(f"""{eMAType.MA15.name} {eMAType.MA15.value} {eMAType.MA15}""")
