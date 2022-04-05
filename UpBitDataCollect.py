@@ -8,65 +8,14 @@ import traceback
 
 from typing import Dict
 
+from AutoTradeUpBit import eTradeState, MAEle, eMAType, eIntervalType, TradePrice
 from FileWriter import FileWriter
 from Log import Log, eLogType
 from MA import MA, eTrendDir
 from MaLists import MaLists
-from Utils.Utils import Utils
+from Utils import Utils
 
 global G_VERSION
-
-
-
-
-class MAEle:
-
-    def __init__(self,_ematype , _min , _active=True):
-        self.maType = _ematype
-        self.min = _min
-        self.isActive = _active
-        pass
-
-    pass
-
-class eMAType(Enum):
-    CP = "cp"
-    MA8 = "ma8"
-    MA15 = "ma15"
-    MA25 = "ma25"
-    MA50 = "ma50"
-
-
-
-class eIntervalType(Enum):
-    DAY="day"
-    MIN1 = "minute1"
-    MIN3 = "minute3"
-    MIN5 = "minute5"
-    WEEK = "week"
-    MONTH = "month"
-
-class eTradeState(Enum):
-
-    NONE = 0    # 어플이 시작됨 ..
-    READY = 1
-    BUY_TRY = 2  # 살려고 노력중
-    BUYING = 3  # 사서 들고 있음
-    SELL_TRY = 4  # 팔려고 시도중
-    SELLING = 5 # 팔아 놓은 상태.............
-
-class TradePrice :
-
-    def __init__(self , _name , _price):
-        self.name = _name
-        self.price = _price
-        self.UpdateTime()
-
-    def UpdateTime(self):
-        self.time = datetime.datetime.now()
-
-    def ToString(self):
-        return "Name : " + self.name + " price : " + str(self.price) + " time : " + str(self.time)
 
 
 class AutoTradeUpBit :
@@ -100,8 +49,8 @@ class AutoTradeUpBit :
 
         self.MaEle = {
             eMAType.MA8.name :  MAEle( eMAType.MA8 ,8,True ) ,
-            eMAType.MA15.name :  MAEle( eMAType.MA15 ,15,False) ,
-            eMAType.MA25.name :  MAEle( eMAType.MA25 ,25,False) ,
+            eMAType.MA15.name :  MAEle( eMAType.MA15 ,15,True) ,
+            eMAType.MA25.name :  MAEle( eMAType.MA25 ,25,True) ,
             eMAType.MA50.name :  MAEle( eMAType.MA50 ,50,True)
         }
 
