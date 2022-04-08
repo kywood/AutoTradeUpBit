@@ -326,7 +326,7 @@ def main():
     ticker = "KRW-BTC"
     fileLoggingConf = "logging.conf"
     fileTradeLog = "tradeLog.txt"
-    basePath = "/home/ubuntu/project/py/AutoTradeUpbit"
+    basePath = "/home/oracle/Project/AutoTrade"
 
     QueueSize=10
 

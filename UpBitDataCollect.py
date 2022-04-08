@@ -131,7 +131,7 @@ class UpBitDataCollect(AutoTradeUpBit) :
 def main():
     G_VERSION = "V.20220405-1"
 
-    CollectCycle = 1
+    CollectCycle = 0.7
     Ticker = "KRW-BTC"
     LoggingConfFile = "logging.conf"
     DataWriteFile = "UpBitCollect.csv"
@@ -144,7 +144,7 @@ def main():
         eMAType.MA50.name: MAEle(eMAType.MA50, 50, True)
     }
 
-    basePath = "/home/ubuntu/project/py/AutoTradeUpbit"
+    basePath = "/home/oracle/Project/AutoTrade"
 
     if platform.system() == "Linux":
         LoggingConfFile = basePath + "/" + LoggingConfFile
