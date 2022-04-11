@@ -24,6 +24,8 @@ class cOracleDBOBJ(cDBOBJ):
 
         self.mCursor = self.mConn.cursor()
 
+        return self
+
 
 
 

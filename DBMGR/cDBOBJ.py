@@ -31,6 +31,10 @@ class cDBOBJ(object):
     def RollBack(self):
         self.mConn.rollback()
 
+    def ExecuteMany(self,qry,param):
+        self.mCursor.executemany(qry,param)
+        pass
+
     def ExecuteQuery(self,qry):
 
         # print "ExecuteQuery ===== > " , self.mConn
@@ -51,6 +55,19 @@ class cDBOBJ(object):
             logging.error("[Exception] ExecuteUpdate > "  + str(ex) + qry)
             raise  ex
 
+    #
+    # qry="insert into MANY_TEST ( MA8 , MA15 ) values(%s,%s)"
+    # param=[]
+    # param.append(["1","1"])
+    # param.append(["2","2"])
+    # param.append(["3","3"])
+    # param.append(["4","4"])
+    # param.append(["5","5"])
+    # for arg in param:
+    #     print(arg)
+    #
+    # DBObj.ExecBulkInsert( qry , param )
+    # DBObj.Commit()
 
     def ExecBulkInsert(self , qry, data_list):
         self.mCursor.executemany( qry , data_list )

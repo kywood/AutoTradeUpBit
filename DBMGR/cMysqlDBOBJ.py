@@ -27,5 +27,8 @@ class cMysqlDBOBJ(cDBOBJ):
         self.mCursor = self.mConn.cursor()
 
 
+        return self
+
+
 
 

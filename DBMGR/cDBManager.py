@@ -54,6 +54,7 @@ class cDBManager(object):
     def Connect(self , db_alias ):
         # print "cDBManager :: Connect " , db_alias
         self.GetDbObject( db_alias ).Connect()
+        return self
 
     def Commit(self , db_alias):
         self.GetDbObject(db_alias).Commit()
@@ -75,7 +76,10 @@ class cDBManager(object):
     def Close(self ,db_alias ):
         self.GetDbObject( db_alias).Close()
 
-    def ExecuteQuery(self ,db_alias,  qry):
+    def ExecuteMany(self,db_alias,qry,param):
+        return self.GetDbObject(db_alias).ExecuteMany(qry,param)
+
+    def ExecuteQuery(self ,db_alias,qry):
         return self.GetDbObject(db_alias).ExecuteQuery( qry )
 
 
