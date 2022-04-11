@@ -20,6 +20,7 @@ class FileWriter:
         self.fileName = _fileName
         self.IsOpen = False
         self.file=None
+        # self.fileCursor=None
         pass
 
     def __del__(self):
@@ -64,3 +65,5 @@ class FileWriter:
         self.file.flush()
 
     pass
+
+

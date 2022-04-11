@@ -1,4 +1,5 @@
 import re
+import sys
 import threading
 import platform
 
@@ -9,7 +10,9 @@ from DBMGR.cDBProperty import cMysqlProperty
 from DBMGR.cDB_DEFINES import I_DB__ALIAS
 
 from DBMGR.cMysqlDBOBJ import cMysqlDBOBJ
+from Defines import E_RUN_MODE
 from Log import Log, eLogType
+from UpBitDataCollect import eCSVHeader
 from Utils.FileUtil import FileUtil
 from Utils.FileWriter import E_FILE_MODE
 
@@ -47,47 +50,55 @@ class UpBitToDB :
 
     def Run(self):
 
-        file= FileUtil("UpBitCollect.csv").Open(E_FILE_MODE.R)
+        fileCursor=FileUtil(self.DataFilePath).OpenCursor()
 
         DBObj = self.DBM.GetDbObject(E_DB_AS.MY_AUTO_TRADE)
         DBObj.Connect()
 
-        param=[]
-        qry="insert into MANY_TEST ( MA8 , MA15 ) values(%s,%s)"
+        qry = """insert into tradedata (`EVENT_TIME`, CURRENT_PRICE ,`MA8`, `MA15`, `MA25`, `MA50`)
+        values(STR_TO_DATE('{0}','%Y%m%d%H%i%S'),{1},{2},{3},{4},{5})"""
 
+        while fileCursor.Next():
+            rs=re.sub("\r\n" , "" ,fileCursor.GetRecordSet())
+            if rs.find(eCSVHeader.DATE_TIME.name) != -1:
+                continue
 
-        commitCnt = 50
-        loopCnt=0
+            rss=rs.split(',')
+            DBObj.GetUpdateQueue().AppendUpdateQry(qry.format(rss[0],rss[1],rss[2],rss[3],rss[4],rss[5]))
 
-        while True:
-            line = re.sub("\r\n" , "" , file.ReadLine() )
-
-            if line == '':
-                break
-            else:
-                print(line)
-                param.append(["1","1"])
-                DBObj.ExecBulkInsert( qry , param )
-#                 DBObj.ExecuteUpdate( f"""
-# insert into tradedata (`EVENT_TIME`, CURRENT_PRICE ,`MA8`, `MA15`, `MA25`, `MA50`)
-# values(STR_TO_DATE('20220408150846','%Y%m%d%H%i%S'),54232000.0,54224000.0,54221733.333333336,54216160.0,54180680.0);
-#                 """ )
-
-            if loopCnt % commitCnt == 0:
-                DBObj.Commit()
-
-            loopCnt = loopCnt + 1
-
-        DBObj.Commit()
+        DBObj.GetUpdateQueue().ExecuteUpdateAll()
 
     pass
 
 
-def main():
+class E_ARGV:
+    SELF=0
+    DATA_FILE=1
+    RUN_MODE = 2
+    MAX=3
+    pass
+
+def Usage(argv):
+    print(f""" python ./app CsvFileName [runMode (0:debug 1:release)] """)
+    pass
+
+def main(argv):
     G_VERSION = "V.20220405-1"
 
     LoggingConfFile = "logging.conf"
     DataFile = "UpBitCollect.csv"
+
+    if len(argv) == E_ARGV.MAX:
+        RunMode = argv[E_ARGV.RUN_MODE]
+        DataFile = argv[E_ARGV.DATA_FILE]
+        return
+    elif len(argv) == E_ARGV.MAX - 1:
+        RunMode = E_RUN_MODE.DEBUG
+        DataFile = argv[E_ARGV.DATA_FILE]
+    else:
+        Usage(argv)
+        pass
+
 
     basePath = "/home/oracle/Project/AutoTrade"
 
@@ -104,4 +115,4 @@ def main():
     pass
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

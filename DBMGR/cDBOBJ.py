@@ -2,16 +2,20 @@
 #from threading import Lock
 import logging
 
+from DBMGR.cDBUpdateQueue import cDBUpdateQueue
+
 
 class cDBOBJ(object):
-    # mConn = None
-    # mCursor = None
-    # mProperty = None
 
     def __init__(self ,cDBProperty):
         self.mConn = None
         self.mCursor = None
         self.mProperty = cDBProperty
+        self.mUpdateQueue=cDBUpdateQueue(self)
+
+    def GetUpdateQueue(self):
+        return self.mUpdateQueue
+
 
     def GetProperty(self):
         return self.mProperty

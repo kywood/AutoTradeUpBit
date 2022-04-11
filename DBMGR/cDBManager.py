@@ -82,6 +82,9 @@ class cDBManager(object):
     def ExecuteQuery(self ,db_alias,qry):
         return self.GetDbObject(db_alias).ExecuteQuery( qry )
 
+    def GetUpdateQueue(self ,db_alias,qry):
+        return self.GetDbObject(db_alias).GetUpdateQueue()
+
 
     def ExecuteUpdate(self ,db_alias,  qry):
         return self.GetDbObject(db_alias).ExecuteUpdate( qry )

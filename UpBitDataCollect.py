@@ -5,6 +5,7 @@ import time
 from enum import Enum
 
 from AutoTradeUpBit import eTradeState, MAEle, eMAType, eIntervalType, TradePrice, AutoTradeUpBit
+from Defines import E_RUN_MODE
 from Log import Log, eLogType
 from MA import MA, eTrendDir
 from Utils.Csv import CustomCsv
@@ -136,10 +137,6 @@ def Usage(argv):
 
     pass
 
-class E_RUN_MODE:
-    DEBUG=0
-    RELEASE=1
-    MAX=2
 
 class E_ARGV:
     SELF=0
@@ -150,13 +147,13 @@ class E_ARGV:
 
 def main(argv):
 
+    G_VERSION = "V.20220405-1"
+
     RunMode=""
     DataWriteFile=""
-
     # argv=[E_ARGV.SELF]="UpBitDataCollect.py"
     # argv[E_ARGV.DATA_FILE]="UpBitCollectSample.csv"
     # argv[E_ARGV.RUN_MODE]=E_RUN_MODE.DEBUG
-
     if len(argv) == E_ARGV.MAX:
         RunMode = argv[E_ARGV.RUN_MODE]
         DataWriteFile = argv[E_ARGV.DATA_FILE]
@@ -168,8 +165,6 @@ def main(argv):
         RunMode = E_RUN_MODE.DEBUG
         DataWriteFile = "UpBitCollectSample.csv"
         pass
-
-    G_VERSION = "V.20220405-1"
 
     CollectCycle = 0.7
     Ticker = "KRW-BTC"
