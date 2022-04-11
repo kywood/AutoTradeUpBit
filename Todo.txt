@@ -1,0 +1,25 @@
+
+
+F:\tec\linux
+F:\project_atdata\kma\py\kmaProc\cKmaProc.py
+
+
+
+##
+1. 수집은 txt 파일로
+
+2. 파일을 DB화 한다.....
+
+
+
+
+
+
+
+
+
+####################
+
+pip3 install cx_oracle
+pip3 install pymysql
+pip3 install pyupbit
