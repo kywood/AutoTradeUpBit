@@ -8,9 +8,12 @@ import pyupbit
 import traceback
 
 from AutoTradeUpBit import eMAType, TradePrice
+from DBMGR.cDBManager import cDBManager
 from LimitedList import LimitedList
 from Log import Log, eLogType
 from UpBitDataCollect import eCSVHeader
+from UpBitToDB import cDB_Info_Test
+from UpBitToDB import E_DB_AS
 from Utils.Csv import CustomCsv
 from Utils.CsvData import CsvData
 
@@ -23,28 +26,67 @@ def print_hi(name):
     log.Print(eLogType.INFO , "test")
 
 
-    csv=CustomCsv("./UpBitCollect.txt")
-    csv.Open()
+    DBM = cDBManager(cDB_Info_Test())
 
-    # csvData = CsvData()
-    # csvData.Append(1).Append("3")
-    # # csvData.Append("3")
-    # csvData.Append("korea")
+    DBObj = DBM.GetDbObject(E_DB_AS.MY_AUTO_TRADE)
+    DBObj.Connect()
+
+    qry="insert into MANY_TEST ( MA8 , MA15 ) values(%s,%s)"
+    param=[]
+    param.append(["1","1"])
+    param.append(["2","2"])
+    param.append(["3","3"])
+    param.append(["4","4"])
+    param.append(["5","5"])
+    for arg in param:
+        print(arg)
+
+    DBObj.ExecBulkInsert( qry , param )
+    DBObj.Commit()
+
+
     #
-    # csvData2=CsvData([2,"100","usa"])
+    # b= lambda dbObj, query: dbObj.ExecuteQuery(query)
+    # print(b(DBObj,f"""select 1 from dual"""))
     #
+    # a= lambda dbObj,query:dbObj.ExecuteQuery(query)(DBObj,f"""select 1 from dual""")
 
-    csv.WriteHead(eCSVHeader.GetRowdata())
+    #
+    #
+    # queue=[]
+    # queue.append(
+    #     (lambda dbObj,query:dbObj.ExecuteQuery(query))(DBObj , f"""insert into aaa""")
+    #
+    # )
+    #
+    # print("a")
+    # print(a)
 
-    # csv.WriteRowData([1,"bb","cc"])
-    # csv.WriteRowData([2,"bb","cc"])
-    # csv.WriteRowData([4,"bb","cc"])
-    # csv.WriteRowData([6,"bb","cc"])
-    # csv.WriteRowData(csvData.GetRows())
-    # csv.WriteRowData(csvData2.GetRows())
 
 
-    csv.Close()
+
+    # csv=CustomCsv("./UpBitCollect.txt")
+    # csv.Open()
+    #
+    # # csvData = CsvData()
+    # # csvData.Append(1).Append("3")
+    # # # csvData.Append("3")
+    # # csvData.Append("korea")
+    # #
+    # # csvData2=CsvData([2,"100","usa"])
+    # #
+    #
+    # csv.WriteHead(eCSVHeader.GetRowdata())
+    #
+    # # csv.WriteRowData([1,"bb","cc"])
+    # # csv.WriteRowData([2,"bb","cc"])
+    # # csv.WriteRowData([4,"bb","cc"])
+    # # csv.WriteRowData([6,"bb","cc"])
+    # # csv.WriteRowData(csvData.GetRows())
+    # # csv.WriteRowData(csvData2.GetRows())
+    #
+    #
+    # csv.Close()
 
 
 

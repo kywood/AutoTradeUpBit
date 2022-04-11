@@ -1,3 +1,4 @@
+import sys
 import threading
 import platform
 import time
@@ -8,6 +9,7 @@ from Log import Log, eLogType
 from MA import MA, eTrendDir
 from Utils.Csv import CustomCsv
 from Utils.CsvData import CsvData
+from Utils.FileNamePutInBetween import FileNamePutInBetween
 from Utils.Utils import Utils
 global G_VERSION
 
@@ -128,14 +130,56 @@ class UpBitDataCollect(AutoTradeUpBit) :
     pass
 
 
-def main():
+def Usage(argv):
+
+    print(f""" python ./appName CsvFileName [runMode (0:debug 1:release)] """)
+
+    pass
+
+class E_RUN_MODE:
+    DEBUG=0
+    RELEASE=1
+    MAX=2
+
+class E_ARGV:
+    SELF=0
+    DATA_FILE=1
+    RUN_MODE = 2
+    MAX=3
+    pass
+
+def main(argv):
+
+    RunMode=""
+    DataWriteFile=""
+
+    # argv=[E_ARGV.SELF]="UpBitDataCollect.py"
+    # argv[E_ARGV.DATA_FILE]="UpBitCollectSample.csv"
+    # argv[E_ARGV.RUN_MODE]=E_RUN_MODE.DEBUG
+
+    if len(argv) == E_ARGV.MAX:
+        RunMode = argv[E_ARGV.RUN_MODE]
+        DataWriteFile = argv[E_ARGV.DATA_FILE]
+        return
+    elif len(argv) == E_ARGV.MAX - 1:
+        RunMode = E_RUN_MODE.DEBUG
+        DataWriteFile = argv[E_ARGV.DATA_FILE]
+    elif len(argv) == E_ARGV.MAX - 2:
+        RunMode = E_RUN_MODE.DEBUG
+        DataWriteFile = "UpBitCollectSample.csv"
+        pass
+
     G_VERSION = "V.20220405-1"
 
     CollectCycle = 0.7
     Ticker = "KRW-BTC"
     LoggingConfFile = "logging.conf"
-    DataWriteFile = "UpBitCollect.csv"
-    QueueSize=10
+    QueueSize = 10
+
+    if RunMode == E_RUN_MODE.DEBUG:
+        DataWriteFile = FileNamePutInBetween(DataWriteFile,"debug").ToString()
+
+
 
     MaEle = {
         eMAType.MA8.name: MAEle(eMAType.MA8, 8, True),
@@ -162,4 +206,4 @@ def main():
     pass
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
