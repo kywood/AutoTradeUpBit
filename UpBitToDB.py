@@ -64,9 +64,9 @@ class UpBitToDB :
                 continue
 
             rss=rs.split(',')
-            DBObj.GetUpdateQueue().AppendUpdateQry(qry.format(rss[0],rss[1],rss[2],rss[3],rss[4],rss[5]))
+            DBObj.GetUpdateQueue().AppendQry(qry.format(rss[0],rss[1],rss[2],rss[3],rss[4],rss[5]))
 
-        DBObj.GetUpdateQueue().ExecuteUpdateAll()
+        DBObj.GetUpdateQueue().ExecuteAll()
 
     pass
 
