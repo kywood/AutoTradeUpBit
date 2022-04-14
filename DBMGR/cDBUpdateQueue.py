@@ -10,16 +10,19 @@ class cDBUpdateQueue(object):
         self.CommitCnt=0
 
         pass
+    def SetCommitCycle(self,_commitCycle):
+        self.CommitCycle = _commitCycle
+        pass
 
-    def AppendUpdateQry(self,_updateQry):
+    def AppendQry(self,_updateQry):
         self.UpdateQueue.append(_updateQry)
         self.CommitCnt = self.CommitCnt+1
 
         if self.CommitCnt >= self.CommitCycle:
-            self.ExecuteUpdateAll()
+            self.ExecuteAll()
 
 
-    def ExecuteUpdateAll(self):
+    def ExecuteAll(self):
         if len(self.UpdateQueue) <= 0:
             return
 
